@@ -31,9 +31,6 @@ from fastchat.model.compression import load_compress_model
 from fastchat.model.model_chatglm import generate_stream_chatglm
 from fastchat.model.model_codet5p import generate_stream_codet5p
 from fastchat.model.model_falcon import generate_stream_falcon
-from fastchat.model.monkey_patch_non_inplace import (
-    replace_llama_attn_with_non_inplace_operations,
-)
 from fastchat.utils import get_gpu_memory
 
 # Check an environment variable to check if we should be sharing Peft model
@@ -168,8 +165,6 @@ def load_model(
                 kwargs["max_memory"] = {i: max_gpu_memory for i in range(num_gpus)}
     elif device == "mps":
         kwargs = {"torch_dtype": torch.float16}
-        # Avoid bugs in mps backend by not using in-place operations.
-        replace_llama_attn_with_non_inplace_operations()
     elif device == "xpu":
         kwargs = {"torch_dtype": torch.bfloat16}
         # Try to load ipex, while it looks unused, it links into torch for xpu support
